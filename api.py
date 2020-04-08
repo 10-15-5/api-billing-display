@@ -6,6 +6,12 @@ import os
 
 
 def ahsayAPI_Post(payload, url):
+	'''
+	Returns a response number of 200 if it succefully connects to the url
+	
+	Takes in payload and url as parameters, these are stored as enviornment variables.
+	Uses this payload and url to extract data from the database in JSON format.
+	'''
 	headers 	= 	{'content-type':'apllication/json'}
 
 	response = requests.post(url, data=json.dumps(payload), headers=headers)
@@ -13,6 +19,13 @@ def ahsayAPI_Post(payload, url):
 
 
 def cleanup(r):
+	'''
+	Returns an list without all the unnecessary commas, apostrophes etc.
+	
+	Takes r as a paramter. r is in JSON format.
+	Converts r to a string and then replaces unnecessary punctuation marks.
+	Then splits the string and returns it.
+	'''
 	strR = str(r)
 	newString = (strR.replace('"', '').replace(' ', '').replace("'", '').replace('{','').replace('}',''))
 	arrayList = re.split(':|,', newString)
@@ -21,6 +34,15 @@ def cleanup(r):
 
 
 def loopThroughData(data):
+	'''
+	Returns a list that only contains "Login Name", "Owner", "Quota Used" and "Quota".
+	
+	Takes in the arraylist that was cleaned up in the previous function.
+	Loops through the data and every time it comes across one of the key words, it appends the next item to the end of the new list.
+	I ran into a problem where a zero was being printed in the "Login Name" column.
+	I coded in a validation process whereby it always checks to see if the value before "Login Name" is zero, if so it gets deleted.
+	The "Quota" and "Quota Used" were in bytes so I had to change them to terabytes.
+	'''
 	list = []
 	list.append('LOGIN NAME')
 	list.append('OWNER')
@@ -48,6 +70,12 @@ def loopThroughData(data):
 	
 	
 def reorderheadings(list):
+	'''
+	Returns a new list with the members of the old list in a different order ("Owner", "Login Name", "Quota", "Quota Used")
+	
+	I wanted the list to display in the csv in a differnet order.
+	This function takes the list in groups of 4 and reorders them to the order I've specified.
+	'''
 	
 	newlist = []
 	
@@ -65,6 +93,12 @@ def reorderheadings(list):
 
 
 def writeToFile(list):
+	'''
+	Prints the list to a csv file.
+	
+	Takes the first 4 items, prints them and then adds a line break to move to the next line and start again on the next 4 items in the list.
+	This function is in a try; except block as the code would crash if the user hadthe csv file already open on their machine.
+	'''
 	counter = 1;
 	value_to_write = ''
 	file = 'api.csv'
@@ -89,6 +123,9 @@ def writeToFile(list):
 
 
 def envrion_login_details():
+	'''
+	Returns the API Login details and the API URL details that I have set up as environment variables.
+	'''
 	login = os.environ.get('API_LOGIN')
 	url = os.environ.get('API_URL')
 	
@@ -97,7 +134,7 @@ def envrion_login_details():
 	return login_dict, url
 
 
-login, url			= envrion_login_details()
+login, url		= envrion_login_details()
 
 r 				= ahsayAPI_Post(login, url)
 
